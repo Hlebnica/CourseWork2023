@@ -1,0 +1,44 @@
+.fixed-header-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.fixed-header-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #fff;
+}
+
+.scrollable{
+    overflow-y: scroll; 
+    height:400px;
+}
+
+
+td, th {
+    padding: 0;
+    vertical-align: center;
+    text-align: center;
+    line-height: 1;
+}
+
+div{
+    margin-top: 20px;
+}
+
+input{
+    width: auto;
+}
+
+select{
+    width: auto;
+}
+
+.image-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: block;
+    margin: 0 auto;
+}

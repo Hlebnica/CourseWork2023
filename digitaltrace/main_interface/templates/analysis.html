@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block content %}
+
+<html>
+<head>
+    <title>Анализ данных</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <div class="container-fluid"> 
+        <h2 class="display-6">Анализ данных</h2>
+
+        <form  method="GET" action="{{ request.path }}">
+            <input type="hidden" name="page" />
+
+            <div class="form-control">
+                <h3>Модель данных</h3>
+                <div style="margin: 0">
+                    <select class="form-select" style="width: auto;" id="predictive_model" name="predictive_model">
+                        <option value="model1" {% if predictive_model == 'model1' %}selected{% endif %}>Модель прогноза оценки дисциплины за 1 семестр</option>
+                        <option value="model2" {% if predictive_model == 'model2' %}selected{% endif %}>Модель прогноза оценки дисциплины за 2 семестр, который был в 1 семестре</option>
+                        {% comment %} <option value="model3" {% if predictive_model == 'model3' %}selected{% endif %}>Вероятность отчисления по 1 семестру по экзаменам/зачетам</option> {% endcomment %}
+                        <option value="model4" {% if predictive_model == 'model4' %}selected{% endif %}>Вероятность отчисления по 1 и 2 семестру по экзаменам/зачетам</option>
+                        <option value="model5" {% if predictive_model == 'model5' %}selected{% endif %}>Прогноз оценки экзамена/зачета по 1 семестру</option>
+                        <option value="model6" {% if predictive_model == 'model6' %}selected{% endif %}>Прогноз оценки экзамена/зачета по 1 и 2 семестру</option>
+                    </select>
+                </div>
+
+                <div id="subject_name_1_term_div" >
+                    <h3>Предмет</h3>
+                    <select class="form-select" style="width: auto;" name="subject_name_1_term">
+                        {% for item in subject_name_1_term %}
+                            <option {% if subject_name_1_term_item == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div> 
+
+                <div id="subject_name_1_2_term_div">
+                    <h3>Предмет</h3>
+                    <select name="subject_name_1_2_term" class="form-select" style="width: auto;">
+                        {% for item in subject_name_1_2_term %}
+                            <option {% if subject_name_1_2_term_item == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>    
+
+                <div id="type_of_control_div">
+                    <h3>Тип контроля предмета</h3>
+                    <select class="form-select" style="width: auto;"  id="type_of_control" name="type_of_control">
+                        <option value="credit" {% if type_of_control == 'credit' %}selected{% endif %}>Зачет</option>
+                        <option value="exam" {% if type_of_control == 'exam' %}selected{% endif %}>Экзамен</option>
+                    </select>
+                </div>
+
+                <div>
+                    <h3>Аналитическая модель</h3>
+                    <select class="form-select" style="width: auto;"  id="model_training_method" name="model_training_method">
+                        <option value="RandomForestRegressor" {% if model_training_method == 'RandomForestRegressor' %}selected{% endif %}>Случайный лес (регрессор)</option>
+                        <option value="RandomForestClassifier" {% if model_training_method == 'RandomForestClassifier' %}selected{% endif %}>Случайный лес (классификатор)</option>
+
+                        <option value="GradientBoostingRegressor" {% if model_training_method == 'GradientBoostingRegressor' %}selected{% endif %}>Градиентный бустинг (регрессор)</option>
+                        <option value="GradientBoostingClassifier" {% if model_training_method == 'GradientBoostingClassifier' %}selected{% endif %}>Градиентный бустинг (классификатор)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <details>
+                        <summary>Информация о аналитических моделях</summary>
+                        <ul>
+                            <li>Случайный лест</li>
+                            <p style="word-wrap: break-word; width: 900px;">
+                                Случайный лес (регрессор) и Случайный лес (классификатор) - это реализации алгоритма случайного леса для задач 
+                                регрессии и классификации соответственно. Алгоритм случайного леса состоит из ансамбля решающих деревьев, которые 
+                                обучаются независимо друг от друга на случайных подвыборках данных и случайных подмножествах признаков. 
+                                При классификации, для определения класса объекта, случайный лес использует голосование 
+                                большинства среди всех деревьев, а при регрессии, случайный лес возвращает среднее значение предсказаний всех деревьев.
+                            </p>
+        
+                            <li>Градиентный бустинг</li>
+                            <p style="word-wrap: break-word; width: 900px;">
+                                Градиентный бустинг (регрессор) и Градиентный бустинг (классификатор) - это реализации алгоритма градиентного бустинга
+                                для задач регрессии и классификации соответственно. Градиентный бустинг состоит из итеративного обучения небольших 
+                                решающих деревьев, при котором каждое новое дерево учится исправлять ошибки предыдущих деревьев. 
+                                При классификации, градиентный бустинг использует взвешенное голосование деревьев, а при регрессии, 
+                                возвращается сумма предсказаний всех деревьев.
+                            </p>
+                        </ul>
+                    </details>
+                </div>    
+                
+            </div>    
+
+            
+
+            
+            <div class="form-control">
+                <h3>Гиперпараметры</h3>
+
+                <div class="row">
+                    <div class="col-3">
+                        <div>
+                            <label>Размер тестовой выборки</label>
+                            <input class="form-control" style="width: auto;"  type="number" step="0.1" min="0" max="1" name="test_size" value= "{{ test_size | default:0.2 }}"  required />
+                        </div>   
+
+                        <div>
+                            <label>Количество деревьев</label>
+                            <input class="form-control" style="width: auto;"  type="number" name="n_estimators" min="1" value="{{ n_estimators | default:1000 }}" required />
+                        </div> 
+
+                        <div>    
+                            <label>Максимальная глубина деревьев</label>
+                            <input class="form-control" style="width: auto;"  type="number" name="max_depth" min="1" value="{{ max_depth | default:5 }}" required />
+                        </div> 
+                    </div>
+
+                    <div class="col-4">
+                        <div>
+                            <label>Минимальное количество объектов в узле</label>
+                            <input class="form-control" style="width: auto;"  type="number" name="min_samples_split" min="2" value="{{ min_samples_split | default:2 }}" required />
+                        </div>
+
+                        <div>
+                            <label>Минимальное количество объектов в листьях дерева</label>
+                            <input class="form-control" style="width: auto;"  type="number" name="min_samples_leaf" min="1" value="{{ min_samples_leaf | default:1 }}" required />
+                        </div>
+
+                        <div>    
+                            <label>Количество признаков при построении деревьев</label>
+                            <input class="form-control" style="width: auto;"  type="number" name="max_features" min="1" value="{{ max_features | default:3 }}" required />
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <details>
+                        <summary>Информация о гиперпараметрах</summary>
+                        <ul>
+                            <li>Размер тестовой выборки (test_size)</li>
+                            <p style="word-wrap: break-word; width: 900px;">
+                                Этот параметр указывает на долю данных, которые должны быть выделены в тестовую выборку. 
+                                Например, если test_size=0.2, то 20% данных будут использоваться для тестирования, 
+                                а оставшиеся 80% будут использоваться для обучения модели.
+                            </p>
+
+                            <li>Количество деревьев (n_estimators)</li>
+                            <p style="word-wrap: break-word; width: 900px;">
+                                Параметр n_estimators отвечает за количество деревьев, которые будут созданы в ансамбле 
+                                случайных деревьев (Random Forest) или градиентного бустинга (Gradient Boosting).
+                                Увеличение значения n_estimators приводит к увеличению сложности модели 
+                                и времени обучения, но также может улучшить качество предсказаний.
+                            </p>
+                            
+                            <li>Максимальная глубина деревьев (max_depth)</li>
+                            <p style="word-wrap: break-word; width: 900px;">
+                                Параметр max_depth отвечает за максимальную глубину деревьев.
+                                Увеличение max_depth приводит к более сложной модели, что может улучшить качество предсказаний, 
+                                но также может привести к переобучению. Обычно рекомендуется начинать с небольших значений max_depth, 
+                                например, 3-5, и увеличивать его по мере необходимости.
+                            </p>
+
+                            <li>Минимальное количество объектов в узле (min_samples_split)</li>
+                            <p style="word-wrap: break-word; width: 900px;">
+                                Параметр min_samples_split отвечает за минимальное количество объектов в узле, 
+                                при котором происходит разделение дерева на две ветви.
+                                Если число объектов в узле меньше, чем min_samples_split, то разделение этого узла прекращается. 
+                                Установка более высокого значения min_samples_split может привести к более простой модели и снижению переобучения, 
+                                но также может привести к потере точности.
+                            </p>
+
+                            <li>Минимальное количество объектов в листьях дерева (min_samples_leaf)</li>
+                            <p style="word-wrap: break-word; width: 900px;">
+                                Параметр min_samples_leaf отвечает за минимальное количество объектов в листьях дерева, 
+                                которые должны быть в листе, чтобы считать его достаточно информативным.
+                                Если число объектов в листе меньше, чем min_samples_leaf, то дерево строится дальше, 
+                                пока не достигнет заданного числа листьев. Установка более высокого значения min_samples_leaf 
+                                может привести к более простой модели и снижению переобучения, но также может привести к потере точности.
+                            </p>
+
+                            <li>Количество признаков при построении деревьев (max_features)</li>
+                            <p style="word-wrap: break-word; width: 900px;">
+                                Параметр max_features отвечает за максимальное количество признаков, 
+                                используемых при построении каждого дерева. При разбиении узла используется это количество признаков.
+                                Использование ограниченного количества признаков может привести к уменьшению 
+                                переобучения и повышению разнообразия деревьев, но также может привести к потере точности.
+                                В задачах классификации рекомендуется брать sqrt(n), в задачах регрессии – n/3, где n - количество признаков.
+                            </p>
+
+                        </ul>
+                    </details>
+                </div>
+            </div>    
+
+            <div> 
+                <button class="btn btn-primary" type="submit" id="myButton" name="submit">Обучить модель</button>
+            </div>
+        </form>
+
+        {% if messages %}
+        <br>
+        <ul class="messages alert alert-warning list-inline">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+
+        {% if df_predictive_model_html %}
+        
+        <div class="form-control">
+            <h3 style="text-align: center;">Составленная модель данных (выборка модели - {{ df_predictive_model_size }} строк)</h3>
+            <div class="scrollable fixed-header-table">
+                {{ df_predictive_model_html | safe}}
+            </div>
+        </div>
+
+        <div class="form-control"> 
+            <h3 style="text-align: center;">Результат тестирования модели</h3>
+
+            <div>
+                <h4>Таблица предсказанных результатов</h4>
+                <div class="scrollable fixed-header-table">
+                    {{ results_df | safe}}
+                </div>
+            </div>
+
+            <div>
+                <h4>Метрики:</h4>
+                {{ prediction_result | linebreaksbr }}
+            </div>    
+
+            <div>
+                <h4>Диаграмма важности признаков</h4>
+                <img src="data:image/png;base64,{{ feature_importance_graph | safe }}">
+            </div>
+
+            <div>
+                <h4>Диаграмма предсказаний и реальных значений</h4>
+                <img src="data:image/png;base64,{{ predictions_graph | safe }}" alt="Predictions Graph">
+            </div>
+            
+        </div>    
+
+        {% endif %} 
+    </div>
+
+    <script>
+        var predictiveModelSelect = document.getElementById("predictive_model");
+        var typeOfControlDiv = document.getElementById("type_of_control_div");
+
+        var subjectNameTermDiv_1 = document.getElementById("subject_name_1_term_div");
+        var subjectNameTermDiv_1_2 = document.getElementById("subject_name_1_2_term_div");
+
+        function toggleFields() {
+            if (predictiveModelSelect.value === "model1") {
+                subjectNameTermDiv_1.style.display = "block";
+                subjectNameTermDiv_1_2.style.display = "none";
+                typeOfControlDiv.style.display = "none";
+            } else if (predictiveModelSelect.value === "model2") {
+                subjectNameTermDiv_1.style.display = "none";
+                subjectNameTermDiv_1_2.style.display = "block";
+                typeOfControlDiv.style.display = "none";
+            } else {
+                subjectNameTermDiv_1.style.display = "none";
+                subjectNameTermDiv_1_2.style.display = "none";
+                typeOfControlDiv.style.display = "block";
+            }
+        }
+        predictiveModelSelect.addEventListener("change", toggleFields);
+    
+        toggleFields();
+    </script>
+      
+
+</body>
+</html>
+{% endblock %}

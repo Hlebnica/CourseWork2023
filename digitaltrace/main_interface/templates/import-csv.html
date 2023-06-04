@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block content %}
+<html>
+<head>
+    <title>Извлечение данных из CSV</title>
+    <meta charset="utf-8" />
+    
+</head>
+<body>
+    <div class="container-fluid"> 
+        <h2 class="display-6">Извлечение данных из CSV</h2>
+        
+        
+        <div class="form-control"> 
+                <form method="POST" enctype="multipart/form-data" action="{{ request.path }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="page"  />
+
+                    <div class="row">
+                        <div class="col-6">
+                            <div style="margin: 0;">
+                                <label>Журнал по годам</label>
+                                <input class="form-control" type="file" name="file_dfYear" id="file_dfYear" required>
+                            </div>
+
+                            <div>
+                                <label>Информация о студентах</label>
+                                <input class="form-control" type="file" name="file_dfStudents" id="file_dfStudents" required>
+                            </div>
+
+                            <div>
+                                <label>Рейтинг студентов по предметам</label>
+                                <input class="form-control" type="file" name="file_dfRating" id="file_dfRating" required>
+                            </div>
+
+                            <div>
+                                <label>Результаты ЕГЭ студентов</label>
+                                <input class="form-control" type="file" name="file_dfEge" id="file_dfEge" required> 
+                            </div>
+                            
+                            <div> 
+                                <button class="btn btn-primary" type="submit">Загрузить CSV файлы</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        <br>
+
+        {% if df_year_now_html %}
+            <h3>Журнал за {{ year }} учебный год (количество строк - {{ df_year_size }})</h3>
+            <div class="scrollable fixed-header-table">
+                {{ df_year_now_html | safe }}
+            </div>
+        
+            <div>
+                <h3>Информация о студентах за {{ year }} учебный год (количество строк - {{ df_students_by_journal_size }})</h3>
+                <div class="scrollable fixed-header-table">
+                    {{ df_students_by_journal_id_html | safe }} 
+                </div>
+            </div>
+
+            <div>
+                <h3>Рейтинг студентов по предметам за {{ year }} учебный год (количество строк - {{ df_rating_by_journal_size }})</h3>
+                <div class="scrollable fixed-header-table">
+                    {{ df_rating_by_journal_id_html | safe }}
+                </div>
+            </div>
+
+            <div>
+                <h3>Результаты ЕГЭ студентов за {{ year }} учебный год (количество строк - {{ df_ege_by_students_size }})</h3>
+                <div class="scrollable fixed-header-table">
+                    {{ df_ege_by_students_id_html | safe }}
+                </div>
+            </div>
+        {% endif %}
+    </div>    
+</body>
+</html>
+{% endblock %}
